@@ -1,0 +1,16 @@
+[package]
+name = "rayleigh_macro"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+keywords = ["rayleigh"]
+documentation = "https://docs.rs/rayleigh_macro"
+homepage = "https://github.com/thomasMilesTgm/rayleigh"
+repository = "https://github.com/thomasMilesTgm/rayleigh"
+readme = "../README.md"
+workspace = "../"
+description = "Macros for the rayleigh crate"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

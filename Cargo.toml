@@ -1,4 +1,4 @@
 [workspace]
 resolver = "2"
-members = ["rayleigh_core"]
+members = ["rayleigh_core", "rayleigh_macro"]
 

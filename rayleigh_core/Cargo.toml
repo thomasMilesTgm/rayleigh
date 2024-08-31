@@ -14,3 +14,5 @@ description = "A library for dimensional analysis"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ahash = "0.8.11"
+ordered-float = "4.2.2"

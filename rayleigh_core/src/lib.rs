@@ -2,31 +2,54 @@
 
 #![allow(dead_code)]
 
-use std::marker::PhantomData;
-
 use base::*;
+use ordered_float::OrderedFloat;
 use prefix::Prefix;
 
 pub mod base;
 mod experiment;
 pub mod prefix;
 
-pub trait Unit {
-    fn as_general_unit<T>(&self) -> GeneralUnit<T>;
+type InnerField = OrderedFloat<f64>;
+
+pub trait Field: From<InnerField> + Into<InnerField> + Copy {}
+
+impl<T: From<InnerField> + Into<InnerField> + Copy> Field for T {}
+
+pub trait Unit<T: Field>
+where
+    InnerField: From<T>,
+{
+    fn as_real_value(&self) -> RealValue<T>;
 }
 
+pub trait Value {
+    fn idendity() -> Self;
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct SIUnit<Base: Into<BaseUnit>> {
     prefix: Prefix,
-    _phantom: PhantomData<Base>,
+    base: Base,
 }
 
-pub struct ExpUnit<Base: Into<BaseUnit>, T> {
-    base: SIUnit<Base>,
+#[derive(Debug, Clone, Copy)]
+pub struct ExpUnit<Base, T>
+where
+    Base: Into<BaseUnit>,
+    T: Field,
+    InnerField: From<T>,
+{
+    base: Base,
     exponent: T,
 }
 
 /// arbitrary combination of [`SIUnits`](SIUnit) multiplied together
-pub struct GeneralUnit<T> {
+#[derive(Debug, Clone, Copy)]
+pub struct GeneralUnit<T: Field>
+where
+    InnerField: From<T>,
+{
     distance: Option<ExpUnit<Meter, T>>,
     mass: Option<ExpUnit<Kilogram, T>>,
     time: Option<ExpUnit<Second, T>>,
@@ -36,9 +59,60 @@ pub struct GeneralUnit<T> {
     luminous_intensity: Option<ExpUnit<Candela, T>>,
 }
 
-pub struct UnitWithValue<T> {
+impl<T: Field> Default for GeneralUnit<T>
+where
+    InnerField: From<T>,
+{
+    fn default() -> Self {
+        GeneralUnit {
+            distance: None,
+            mass: None,
+            time: None,
+            current: None,
+            temperature: None,
+            amount: None,
+            luminous_intensity: None,
+        }
+    }
+}
+
+pub struct RealValue<T: Field>
+where
+    InnerField: From<T>,
+{
     value: T,
     unit: GeneralUnit<T>,
 }
 
-pub struct MetersPerSecond<T>(pub T);
+#[derive(Debug, Clone, Copy)]
+pub struct MetersPerSecond(pub f64);
+
+impl Unit<f64> for MetersPerSecond {
+    fn as_real_value(&self) -> RealValue<f64> {
+        RealValue {
+            value: self.0,
+            unit: GeneralUnit {
+                distance: Some(ExpUnit {
+                    base: Meter,
+                    exponent: 1.,
+                }),
+                time: Some(ExpUnit {
+                    base: Second,
+                    exponent: -1.,
+                }),
+                ..Default::default()
+            },
+        }
+    }
+}
+
+impl<T> std::ops::Mul<T> for MetersPerSecond
+where
+    T: Unit<f64>,
+{
+    type Output = GeneralUnit<f64>;
+    fn mul(self, rhs: T) -> Self::Output {
+        let lhs = self.as_real_value();
+        let rhs = rhs.as_real_value();
+    }
+}

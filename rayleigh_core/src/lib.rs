@@ -12,15 +12,21 @@ mod experiment;
 mod math;
 pub mod prefix;
 
-type InnerField = OrderedFloat<f64>;
+/// Type alias for [`OrderedFloat<f32>`]
+#[allow(non_camel_case_types)]
+pub type o32 = OrderedFloat<f32>;
 
-pub trait Field: From<InnerField> + Into<InnerField> + Copy {}
+/// Type alias for [`OrderedFloat<f64>`]
+#[allow(non_camel_case_types)]
+pub type o64 = OrderedFloat<f64>;
 
-impl<T: From<InnerField> + Into<InnerField> + Copy> Field for T {}
+pub trait Field: From<o64> + Into<o64> + Copy {}
+
+impl<T: From<o64> + Into<o64> + Copy> Field for T {}
 
 pub trait Unit<T: Field>
 where
-    InnerField: From<T>,
+    o64: From<T>,
 {
     fn as_real_value(&self) -> RealValue<T>;
 }
@@ -40,7 +46,7 @@ pub struct ExpUnit<Base, T>
 where
     Base: Into<BaseUnit>,
     T: Field,
-    InnerField: From<T>,
+    o64: From<T>,
 {
     base: Base,
     exponent: T,
@@ -50,7 +56,7 @@ where
 #[derive(Debug, Clone, Copy)]
 pub struct GeneralUnit<T: Field>
 where
-    InnerField: From<T>,
+    o64: From<T>,
 {
     distance: Option<ExpUnit<Meter, T>>,
     mass: Option<ExpUnit<Kilogram, T>>,
@@ -63,7 +69,7 @@ where
 
 impl<T: Field> Default for GeneralUnit<T>
 where
-    InnerField: From<T>,
+    o64: From<T>,
 {
     fn default() -> Self {
         GeneralUnit {
@@ -80,7 +86,7 @@ where
 
 pub struct RealValue<T: Field>
 where
-    InnerField: From<T>,
+    o64: From<T>,
 {
     value: T,
     unit: GeneralUnit<T>,

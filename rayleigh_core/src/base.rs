@@ -40,10 +40,6 @@ pub type rf32 = RValue<f32>;
 #[allow(non_camel_case_types)]
 pub type rf64 = RValue<f32>;
 
-pub trait UnitDef<Number: FloatCore> {
-    fn units() -> RPowers<Number>;
-}
-
 pub trait RayleighUnit<Number: FloatCore> {
     fn units() -> RPowers<Number>;
 }
@@ -52,7 +48,14 @@ impl<T: RayleighUnit<Number>, Number: FloatCore> TryInto<TypedValue<T, Number>> 
     type Error = RayleighError;
 
     fn try_into(self) -> Result<TypedValue<T, Number>, Self::Error> {
-        todo!()
+        if self.units == T::units() {
+            Ok(TypedValue {
+                rval: self,
+                ty: PhantomData,
+            })
+        } else {
+            Err(RayleighError::UnitMismatch)
+        }
     }
 }
 
@@ -62,6 +65,15 @@ pub struct TypedValue<T, Number: FloatCore> {
     ty: PhantomData<T>,
 }
 
+impl<T: RayleighUnit<Number>, Number: FloatCore> TypedValue<T, Number> {
+    pub fn new(value: Number) -> Self {
+        TypedValue {
+            rval: RValue::new::<T>(value),
+            ty: PhantomData,
+        }
+    }
+}
+
 pub struct RValue<Number: FloatCore> {
     /// The value of the
     pub(crate) value: OrderedFloat<Number>,
@@ -69,7 +81,7 @@ pub struct RValue<Number: FloatCore> {
 }
 
 impl<Number: FloatCore> RValue<Number> {
-    pub fn new<U: UnitDef<Number>>(value: Number) -> Self {
+    pub fn new<U: RayleighUnit<Number>>(value: Number) -> Self {
         RValue {
             value: OrderedFloat(value),
             units: U::units(),

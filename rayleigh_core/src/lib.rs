@@ -7,7 +7,9 @@ use ordered_float::OrderedFloat;
 use prefix::Prefix;
 
 pub mod base;
+pub mod errors;
 mod experiment;
+mod math;
 pub mod prefix;
 
 type InnerField = OrderedFloat<f64>;
@@ -103,16 +105,5 @@ impl Unit<f64> for MetersPerSecond {
                 ..Default::default()
             },
         }
-    }
-}
-
-impl<T> std::ops::Mul<T> for MetersPerSecond
-where
-    T: Unit<f64>,
-{
-    type Output = GeneralUnit<f64>;
-    fn mul(self, rhs: T) -> Self::Output {
-        let lhs = self.as_real_value();
-        let rhs = rhs.as_real_value();
     }
 }

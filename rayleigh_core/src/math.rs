@@ -1,10 +1,10 @@
 use ordered_float::FloatCore;
 
-use crate::base::*;
+use crate::{base::*, traits::Number};
 
-impl<T: FloatCore> std::ops::Mul for RValue<T>
+impl<N: Number> std::ops::Mul for RValue<N>
 where
-    ordered_float::OrderedFloat<T>: std::ops::Mul<Output = ordered_float::OrderedFloat<T>>,
+    ordered_float::OrderedFloat<N>: std::ops::Mul<Output = ordered_float::OrderedFloat<N>>,
 {
     type Output = Self;
 
@@ -16,10 +16,10 @@ where
 /* === RPowers === */
 
 /* Mul */
-impl<T: FloatCore> std::ops::Mul for RPowers<T>
+impl<N: Number> std::ops::Mul for RPowers<N>
 where
-    T: Copy,
-    ordered_float::OrderedFloat<T>: std::ops::Mul<Output = ordered_float::OrderedFloat<T>>,
+    N: Copy,
+    ordered_float::OrderedFloat<N>: std::ops::Mul<Output = ordered_float::OrderedFloat<N>>,
 {
     type Output = Self;
 
@@ -35,10 +35,10 @@ where
 }
 
 /* Div */
-impl<T: FloatCore> std::ops::Div for RPowers<T>
+impl<N: Number> std::ops::Div for RPowers<N>
 where
-    T: Copy,
-    ordered_float::OrderedFloat<T>: std::ops::Div<Output = ordered_float::OrderedFloat<T>>,
+    N: Copy,
+    ordered_float::OrderedFloat<N>: std::ops::Div<Output = ordered_float::OrderedFloat<N>>,
 {
     type Output = Self;
 
@@ -54,10 +54,10 @@ where
 }
 
 /* Add */
-impl<T: FloatCore> std::ops::Add for RPowers<T>
+impl<N: Number> std::ops::Add for RPowers<N>
 where
-    T: Copy,
-    ordered_float::OrderedFloat<T>: std::ops::Add<Output = ordered_float::OrderedFloat<T>>,
+    N: Copy,
+    ordered_float::OrderedFloat<N>: std::ops::Add<Output = ordered_float::OrderedFloat<N>>,
 {
     type Output = Self;
 
@@ -73,10 +73,10 @@ where
 }
 
 /* Sub */
-impl<T: FloatCore> std::ops::Sub for RPowers<T>
+impl<N: Number> std::ops::Sub for RPowers<N>
 where
-    T: Copy,
-    ordered_float::OrderedFloat<T>: std::ops::Sub<Output = ordered_float::OrderedFloat<T>>,
+    N: Copy,
+    ordered_float::OrderedFloat<N>: std::ops::Sub<Output = ordered_float::OrderedFloat<N>>,
 {
     type Output = Self;
 

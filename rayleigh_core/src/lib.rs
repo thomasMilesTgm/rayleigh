@@ -11,6 +11,7 @@ pub mod errors;
 mod experiment;
 mod math;
 pub mod prefix;
+pub mod traits;
 
 /// Type alias for [`OrderedFloat<f32>`]
 #[allow(non_camel_case_types)]

@@ -1,7 +1,10 @@
 //!
 
-use crate::{base::*, o32};
-use ordered_float::FloatCore;
+use crate::{
+    base::*,
+    o32,
+    traits::{Number, RayleighUnit},
+};
 
 /// Kg m s^-2
 ///
@@ -9,12 +12,12 @@ use ordered_float::FloatCore;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Newton(pub o32);
 
-impl<T: FloatCore + Default> RayleighUnit<T> for Newton {
-    fn units() -> RPowers<T> {
+impl<N: Number> RayleighUnit<N> for Newton {
+    fn units() -> RPowers<N> {
         let powers = vec![
-            UnitPower::kilogram(T::from(1_f32).unwrap()),
-            UnitPower::meter(T::from(1.).unwrap()),
-            UnitPower::second(T::from(-2.).unwrap()),
+            UnitPower::kilogram(N::from(1_f32).unwrap()),
+            UnitPower::meter(N::from(1.).unwrap()),
+            UnitPower::second(N::from(-2.).unwrap()),
         ];
 
         RPowers::new(powers)

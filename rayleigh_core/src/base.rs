@@ -2,9 +2,12 @@
 
 use std::marker::PhantomData;
 
-use ordered_float::{FloatCore, OrderedFloat};
+use ordered_float::OrderedFloat;
 
-use crate::errors::RayleighError;
+use crate::{
+    errors::RayleighError,
+    traits::{Number, RayleighUnit},
+};
 
 /// SI unit of distance
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -35,19 +38,21 @@ pub struct Mole;
 pub struct Candela;
 
 #[allow(non_camel_case_types)]
+pub type of32 = OrderedFloat<f32>;
+
+#[allow(non_camel_case_types)]
+pub type of64 = OrderedFloat<f32>;
+
+#[allow(non_camel_case_types)]
 pub type rf32 = RValue<f32>;
 
 #[allow(non_camel_case_types)]
 pub type rf64 = RValue<f32>;
 
-pub trait RayleighUnit<Number: FloatCore> {
-    fn units() -> RPowers<Number>;
-}
-
-impl<T: RayleighUnit<Number>, Number: FloatCore> TryInto<TypedValue<T, Number>> for RValue<Number> {
+impl<T: RayleighUnit<N>, N: Number> TryInto<TypedValue<T, N>> for RValue<N> {
     type Error = RayleighError;
 
-    fn try_into(self) -> Result<TypedValue<T, Number>, Self::Error> {
+    fn try_into(self) -> Result<TypedValue<T, N>, Self::Error> {
         if self.units == T::units() {
             Ok(TypedValue {
                 rval: self,
@@ -60,13 +65,13 @@ impl<T: RayleighUnit<Number>, Number: FloatCore> TryInto<TypedValue<T, Number>> 
 }
 
 /// A strongly typed [`RValue`].
-pub struct TypedValue<T, Number: FloatCore> {
-    pub rval: RValue<Number>,
+pub struct TypedValue<T, N: Number> {
+    pub rval: RValue<N>,
     ty: PhantomData<T>,
 }
 
-impl<T: RayleighUnit<Number>, Number: FloatCore> TypedValue<T, Number> {
-    pub fn new(value: Number) -> Self {
+impl<T: RayleighUnit<N>, N: Number> TypedValue<T, N> {
+    pub fn new(value: N) -> Self {
         TypedValue {
             rval: RValue::new::<T>(value),
             ty: PhantomData,
@@ -74,14 +79,14 @@ impl<T: RayleighUnit<Number>, Number: FloatCore> TypedValue<T, Number> {
     }
 }
 
-pub struct RValue<Number: FloatCore> {
+pub struct RValue<N: Number> {
     /// The value of the
-    pub(crate) value: OrderedFloat<Number>,
-    pub(crate) units: RPowers<Number>,
+    pub(crate) value: OrderedFloat<N>,
+    pub(crate) units: RPowers<N>,
 }
 
-impl<Number: FloatCore> RValue<Number> {
-    pub fn new<U: RayleighUnit<Number>>(value: Number) -> Self {
+impl<N: Number> RValue<N> {
+    pub fn new<U: RayleighUnit<N>>(value: N) -> Self {
         RValue {
             value: OrderedFloat(value),
             units: U::units(),
@@ -89,21 +94,29 @@ impl<Number: FloatCore> RValue<Number> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
-pub struct RPowers<Number: FloatCore> {
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
+pub struct RPowers<N: Number> {
     ///  Powers of each base unit
     /// [m^x, kg^x, s^x, a^x, k^x, mol^x, cd^x]
-    pub powers: [OrderedFloat<Number>; 7],
+    pub powers: [OrderedFloat<N>; 7],
 }
 
-impl<Number: FloatCore + Default> RPowers<Number> {
-    pub fn new(unit_powers: Vec<UnitPower<Number>>) -> Self {
-        let mut powers = [OrderedFloat(Number::default()); 7];
+impl<N: Number> Default for RPowers<N> {
+    fn default() -> Self {
+        RPowers {
+            powers: [OrderedFloat(N::default()); 7],
+        }
+    }
+}
+
+impl<N: Number> RPowers<N> {
+    pub fn new(unit_powers: Vec<UnitPower<N>>) -> Self {
+        let mut new = Self::default();
         unit_powers.into_iter().for_each(|up| {
-            powers[up.unit.index()] = up.power;
+            new.powers[up.unit.index()] = up.power;
         });
 
-        Self { powers }
+        new
     }
 }
 
